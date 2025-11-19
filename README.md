@@ -1,2 +1,2 @@
 # DMML-GROUP_12
-Our Repo for google co-lab
+Our Repo for Google co-lab works and the CNN created on the MACBOOK PRO M5
