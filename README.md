@@ -89,6 +89,7 @@ pip install -r requirements.txt
 ```
 
 ## CNN Training 
+# We were forced to run the CNN model locally on a MacBook Pro laptop M5, as we ran out of compilations time on Google Colab as well as the GPU available on the M5 was more powerful and could train faster as our dataset was exceptionally large containing roughly ~ 1.4 Million images.
 ```bash
 python train.py --epochs 10 --batch_size 64 --lr 1e-3 --num_workers 8 --pin_memory --device mps
 ```
