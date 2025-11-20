@@ -88,7 +88,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Training
+## CNN Training 
 ```bash
 python train.py --epochs 10 --batch_size 64 --lr 1e-3 --num_workers 8 --pin_memory --device mps
 ```
