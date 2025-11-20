@@ -39,20 +39,18 @@ class CarDataset(Dataset):
         self.seed = seed
         random.seed(seed)
 
-        # Load CSV and build Genmodel_ID -> Bodytype & Maker mapping
         df = pd.read_csv(self.csv_path, low_memory=False)
         df.columns = [c.strip() for c in df.columns]
         if not {"Genmodel_ID", "Bodytype", "Maker"}.issubset(df.columns):
             raise ValueError("Expected columns Genmodel_ID, Bodytype, Maker not all found in CSV")
-        df = df.dropna(subset=["Bodytype", "Maker", "Genmodel_ID"])  # conservative
+        df = df.dropna(subset=["Bodytype", "Maker", "Genmodel_ID"])
         genmodel_to_body = df.groupby("Genmodel_ID")["Bodytype"].first().to_dict()
         genmodel_to_maker = df.groupby("Genmodel_ID")["Maker"].first().to_dict()
 
         self.genmodel_to_body = genmodel_to_body
         self.genmodel_to_maker = genmodel_to_maker
 
-        # Collect samples
-        all_samples: List[Tuple[str, str, str, str, str]] = []  # (filepath, maker, bodytype, color, model)
+        all_samples: List[Tuple[str, str, str, str, str]] = []
 
         for brand in sorted(os.listdir(self.root_dir)):
             brand_path = os.path.join(self.root_dir, brand)
@@ -78,20 +76,18 @@ class CarDataset(Dataset):
                                 continue
                             tokens = fname.split("$$")
                             if len(tokens) < 6:
-                                continue  # unexpected naming
+                                continue
                             genmodel_id = tokens[4]
-                            maker = brand  # brand folder name
-                            # Prefer mapping from CSV for maker if available (normalizes capitalization)
+                            maker = brand
                             maker = self.genmodel_to_maker.get(genmodel_id, maker)
                             bodytype = self.genmodel_to_body.get(genmodel_id)
                             if bodytype is None:
-                                continue  # skip if bodytype unknown
+                                continue
                             color_name = color
                             model_key = f"{maker}::{model}"
                             group_files.append((fpath, maker, bodytype, color_name, model_key))
                         if not group_files:
                             continue
-                        # Split this group 80/20 deterministically
                         random.shuffle(group_files)
                         split_idx = int(0.8 * len(group_files))
                         train_group = group_files[:split_idx]
@@ -101,7 +97,6 @@ class CarDataset(Dataset):
                         else:
                             all_samples.extend(test_group)
 
-        # Build label vocabularies (reuse provided mappings if resuming)
         if maker_to_idx is None:
             makers = sorted({m for _, m, _, _, _ in all_samples})
             self.maker_to_idx = {m: i for i, m in enumerate(makers)}
@@ -126,7 +121,6 @@ class CarDataset(Dataset):
         else:
             self.model_to_idx = dict(model_to_idx)
 
-        # Filter samples to those present in mappings and convert to index tuples
         filtered_samples: List[Tuple[str, int, int, int, int]] = []
         for path, maker_name, body_name, color_name, model_name in all_samples:
             maker_idx = self.maker_to_idx.get(maker_name)
@@ -139,7 +133,6 @@ class CarDataset(Dataset):
 
         self.samples = filtered_samples
 
-        # Define transforms (EfficientNet normalization values from weights)
         self.transform = transforms.Compose([
             transforms.Resize((image_size, image_size)),
             transforms.ToTensor(),
@@ -178,7 +171,6 @@ class CarDataset(Dataset):
     def num_models(self) -> int:
         return len(self.model_to_idx)
 if __name__ == "__main__":
-    # Simple smoke test
     dataset = CarDataset(
         root_dir=os.path.join(os.path.dirname(__file__), "..", "resized_DVM"),
         csv_path=os.path.join(os.path.dirname(__file__), "..", "Adv_table.csv"),

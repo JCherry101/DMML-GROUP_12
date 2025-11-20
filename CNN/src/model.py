@@ -20,7 +20,7 @@ def upgrade_multi_head_state_dict(state_dict: Dict[str, torch.Tensor]) -> Dict[s
 
 
 class DualHeadCarNet(nn.Module):
-    """EfficientNet backbone with optional color/model heads."""
+    """EfficientNet backbone with color/model heads."""
 
     def __init__(
         self,

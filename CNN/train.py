@@ -7,10 +7,8 @@ from torch import nn
 from torch.utils.data import DataLoader, Subset
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from tqdm import tqdm
-
 from src.dataset import CarDataset
 from src.model import DualHeadCarNet, upgrade_multi_head_state_dict
-
 
 def compute_metrics(y_true, y_pred, label_type: str):
     acc = accuracy_score(y_true, y_pred)
